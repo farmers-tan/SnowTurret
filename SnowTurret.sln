@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2035
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnowTurret", "SnowTurret\SnowTurret.csproj", "{486ABD1B-9EED-4847-8EF7-F09D67432EEE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{486ABD1B-9EED-4847-8EF7-F09D67432EEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{486ABD1B-9EED-4847-8EF7-F09D67432EEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{486ABD1B-9EED-4847-8EF7-F09D67432EEE}.Debug|x64.ActiveCfg = Debug|x64
+		{486ABD1B-9EED-4847-8EF7-F09D67432EEE}.Debug|x64.Build.0 = Debug|x64
+		{486ABD1B-9EED-4847-8EF7-F09D67432EEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{486ABD1B-9EED-4847-8EF7-F09D67432EEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{486ABD1B-9EED-4847-8EF7-F09D67432EEE}.Release|x64.ActiveCfg = Release|x64
+		{486ABD1B-9EED-4847-8EF7-F09D67432EEE}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EFE7B178-78BC-48F9-9650-1A066FC0FF65}
+	EndGlobalSection
+EndGlobal
