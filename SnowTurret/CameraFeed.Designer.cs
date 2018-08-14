@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System;
 using SnowTurret.Detection;
+using Emgu.CV.CvEnum;
 
 namespace SnowTurret
 {
@@ -12,15 +13,32 @@ namespace SnowTurret
     {
         private System.ComponentModel.IContainer components = null;
 
+        // Determines boundary of brightness while turning grayscale image to binary (black-white) image
+        private const int Threshold = 5;
+
+        // Erosion to remove noise (reduce white pixel zones)
+        private const int ErodeIterations = 3;
+
+        // Dilation to enhance erosion survivors (enlarge white pixel zones)
+        private const int DilateIterations = 3;
+
         private VideoCapture _capture;
         private Mat _frame;
         private long _processingTime;
+
+        private static Mat rawFrame = new Mat(); // Frame as obtained from video
+        private static Mat backgroundFrame = new Mat(); // Frame used as base for change detection
+        private static Mat diffFrame = new Mat(); // Image showing differences between background and raw frame
+        private static Mat grayscaleDiffFrame = new Mat(); // Image showing differences in 8-bit color depth
+        private static Mat binaryDiffFrame = new Mat(); // Image showing changed areas in white and unchanged in black
+        private static Mat denoisedDiffFrame = new Mat(); // Image with irrelevant changes removed with opening operation
+        private static Mat finalFrame = new Mat(); // Video frame with detected object marked
 
         public CameraFeed()
         {
             InitializeComponent();
 
-            _capture = new VideoCapture();
+            _capture = new VideoCapture(0);
             _frame = new Mat();
 
             _capture.ImageGrabbed += Capture_ImageGrabbed;
@@ -28,6 +46,7 @@ namespace SnowTurret
 
             if (_capture != null)
             {
+                backgroundFrame = _capture.QueryFrame();
                 _capture.Start();
             }
         }
@@ -50,18 +69,36 @@ namespace SnowTurret
         {
             if (_capture != null && _capture.Ptr != IntPtr.Zero)
             {
-                _capture.Retrieve(_frame, 0);
-                pictureBox1.Image = FindPerson.Find(_frame.ToImage<Bgr, Byte>(), out _processingTime).ToBitmap();
-                //label1.Text = "Processing Time: " + _processingTime.ToString();
+                //_capture.Retrieve(_frame, 0);
+                //pictureBox1.Image = FindPerson.Find(_frame.ToImage<Bgr, Byte>(), out _processingTime).ToBitmap();
+
+                _capture.Retrieve(rawFrame, 0);
+                if (rawFrame != null)
+                {
+                    ProcessFrame(backgroundFrame, Threshold, ErodeIterations, DilateIterations);
+                }
             }
+        }
+
+        private static void ProcessFrame(Mat backgroundFrame, int threshold, int erodeIterations, int dilateIterations)
+        {
+            // Find difference between background (first) frame and current frame
+            CvInvoke.AbsDiff(backgroundFrame, rawFrame, diffFrame);
+
+            // Apply binary threshold to grayscale image (white pixel will mark difference)
+            CvInvoke.CvtColor(diffFrame, grayscaleDiffFrame, ColorConversion.Bgr2Gray);
+            CvInvoke.Threshold(grayscaleDiffFrame, binaryDiffFrame, threshold, 255, ThresholdType.Binary);
+
+            // Remove noise with opening operation (erosion followed by dilation)
+            CvInvoke.Erode(binaryDiffFrame, denoisedDiffFrame, null, new Point(-1, -1), erodeIterations, BorderType.Default, new MCvScalar(1));
+            CvInvoke.Dilate(denoisedDiffFrame, denoisedDiffFrame, null, new Point(-1, -1), dilateIterations, BorderType.Default, new MCvScalar(1));
+
+            rawFrame.CopyTo(finalFrame);
+            FindPerson.DetectObject(denoisedDiffFrame, finalFrame);
         }
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -90,7 +127,7 @@ namespace SnowTurret
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1269, 723);
+            this.ClientSize = new System.Drawing.Size(875, 717);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.pictureBox1);
             this.Name = "CameraFeed";
